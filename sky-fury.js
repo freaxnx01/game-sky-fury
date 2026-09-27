@@ -372,7 +372,7 @@ class Game {
 
   dropPlayerBomb() {
     const p = this.player;
-    p.bombs--;
+    if (!this.sandbox) p.bombs--;
     this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));
     this.audio.click();
   }
@@ -618,7 +618,7 @@ class Game {
     const p = this.player;
     if (p.state === 'dead') return;
     p.state = 'dead'; p.deadT = 1.9;
-    this.lives--;
+    if (!this.sandbox) this.lives--;
     if (where === 'water') {
       this.addSplash(p.x, 0, true);
       this.audio.splash(true);
@@ -628,7 +628,8 @@ class Game {
     }
     this.addDebris(p.x, p.y, 10, '#3e5a77');
     this.shake(14);
-    if (this.lives > 0) this.banner('PLANE LOST', this.lives + (this.lives === 1 ? ' plane' : ' planes') + ' remaining', 2.2);
+    if (this.sandbox) this.banner('PLANE LOST', 'Sandbox — no plane used', 2.2);
+    else if (this.lives > 0) this.banner('PLANE LOST', this.lives + (this.lives === 1 ? ' plane' : ' planes') + ' remaining', 2.2);
   }
 
   /* ------------------------------- fighters ------------------------------- */
@@ -965,7 +966,7 @@ class Game {
       const gy = this.overIsland(b.x) ? this.groundAt(b.x) : 0;
       // carrier hit (enemy bombs only)
       if (b.hostile && b.x > CV.x0 && b.x < CV.x1 && b.y >= DECK_Y - 4 && this.carrierHp > 0) {
-        this.carrierHp = Math.max(0, this.carrierHp - 16);
+        if (!this.sandbox) this.carrierHp = Math.max(0, this.carrierHp - 16);
         this.addExplosion(b.x, DECK_Y, 1.3);
         this.audio.boom(1.6); this.shake(12);
         // player parked on deck caught in blast
@@ -1098,7 +1099,7 @@ class Game {
 
   damagePlayer(dmg, why) {
     const p = this.player;
-    if (p.state === 'dead') return;
+    if (p.state === 'dead' || this.sandbox) return;
     p.hp -= dmg;
     p.hitFlash = 0.15;
     this.shake(Math.min(dmg * 0.4, 8));
