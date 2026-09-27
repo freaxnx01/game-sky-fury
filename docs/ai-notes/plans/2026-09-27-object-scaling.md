@@ -16,6 +16,13 @@ world-to-screen zoom, `sky-fury.js:219`) is not touched.
 - The stack is a buildless browser game. There is no test runner, so each task ends
   with a manual in-browser check: `python3 -m http.server 8000` in the repo root, then
   open `http://localhost:8000/`.
+- **Pipeline verification commands** (run BEFORE and AFTER, paste the output into the PR):
+  ```bash
+  node --check sky-fury.js                      # syntax: no output, exit 0 before and after
+  grep -c 'PLANE_SCALE\|OBJ_SCALE' sky-fury.js  # before: 0 — after: > 0
+  git diff --name-only origin/main              # after: only sky-fury.js
+  ```
+  The manual playtest (Task 5) remains the human gate. Don't claim it was run; list it in the PR as outstanding.
 - Only edit `sky-fury.js`. Don't touch `index.html`, `version.js`, the world
   constants (`WORLD_W`, `DECK_Y`, `CV`, `ISLE`), speeds or timers.
 - Use `const`/`let` and keep the existing code style. Leave no commented-out code.
