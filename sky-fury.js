@@ -1248,6 +1248,7 @@ class Game {
     this.drawTargets(ctx);
     this.drawShips(ctx);
     this.drawCarrier(ctx);
+    if (this.state === 'playing') this.drawBombAim(ctx);
     this.drawProjectiles(ctx);
     this.drawAircraft(ctx);
     this.drawFx(ctx);
@@ -1731,6 +1732,37 @@ class Game {
   }
 
   /* -------- projectiles & fx -------- */
+  drawBombAim(ctx) {
+    const aim = this.bombAim;
+    if (!aim) return;
+    const sc = this.scale;
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1.5 * sc;
+    ctx.setLineDash([4 * sc, 8 * sc]);
+    ctx.beginPath();
+    aim.path.forEach((pt, i) => {
+      const x = this.sx(pt.x), y = this.sy(pt.y);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    this.drawAimReticle(ctx, this.sx(aim.x), this.sy(aim.y), sc);
+    ctx.restore();
+  }
+  drawAimReticle(ctx, x, y, sc) {
+    const r = 11 * sc, tick = 6 * sc;
+    ctx.strokeStyle = 'rgba(255,210,74,0.9)';
+    ctx.lineWidth = 2 * sc;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, TAU);
+    ctx.moveTo(x - r - tick, y); ctx.lineTo(x - r + tick, y);
+    ctx.moveTo(x + r - tick, y); ctx.lineTo(x + r + tick, y);
+    ctx.moveTo(x, y - r - tick); ctx.lineTo(x, y - r + tick);
+    ctx.moveTo(x, y + r - tick); ctx.lineTo(x, y + r + tick);
+    ctx.stroke();
+  }
   drawProjectiles(ctx) {
     const sc = this.scale;
     const os = sc * OBJ_SCALE;
