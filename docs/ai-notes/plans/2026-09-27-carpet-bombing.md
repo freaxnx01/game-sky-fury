@@ -7,6 +7,7 @@
 **Architecture:** Reuse the existing player-bomb projectile and impact code unchanged. Add an edge-triggered `wantCarpet` input flag (same pattern as `wantTorp`), two per-plane fields (`carpetN` = bombs still to release, `carpetT` = time until next release), and four small `Game` methods (`dropPlayerBomb`, `updateCarpet`, `startCarpet`, `releaseCarpetBomb`) called from the flying branch of `updatePlayer`. Document the control in the menu card and README.
 
 **Global Constraints:**
+- **Rebased onto #2 + #4 (2026-09-28):** the single-bomb drop on `main` is now `this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));` (shared helper from #4, release point `p.y + 10 * PLANE_SCALE` from #2). `dropPlayerBomb()` must keep using `bombLaunch(p)` — never reintroduce the old inline literal.
 - **Pipeline verification commands** (run BEFORE and AFTER, paste the output into the PR):
   ```bash
   node --check sky-fury.js      # syntax: no output, exit 0 before and after
@@ -86,7 +87,7 @@ git commit -m "feat(weapons): add carpet-bombing input flag and plane state"
   dropPlayerBomb() {
     const p = this.player;
     p.bombs--;
-    this.bombs.push({ x: p.x, y: p.y + 10, vx: p.vx, vy: p.vy + 30, hostile: false });
+    this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));
     this.audio.click();
   }
   updateCarpet(dt) {
@@ -118,7 +119,7 @@ git commit -m "feat(weapons): add carpet-bombing input flag and plane state"
 ```js
     if (k.KeyB && p.bombT <= 0 && p.bombs > 0) {
       p.bombT = 0.32; p.bombs--;
-      this.bombs.push({ x: p.x, y: p.y + 10, vx: p.vx, vy: p.vy + 30, hostile: false });
+      this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));
       this.audio.click();
     }
 ```
