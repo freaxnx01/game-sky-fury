@@ -351,7 +351,7 @@ class Game {
     }
     if (c === 'KeyF' && this.state === 'playing' && !this.paused) this.tryFlip();
     if ((c === 'KeyX' || c === 'KeyT') && !e.repeat && this.state === 'playing' && !this.paused) this.wantTorp = true;
-    if (c === 'KeyB' && e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused) this.wantCarpet = true;
+    if (c === 'KeyB' && e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantCarpet = true;
   }
   tryFlip() {
     const p = this.player;
@@ -360,6 +360,35 @@ class Game {
     p.flipT = FLIP_DUR;
     p.flipDir = -fwd;
     this.audio.whoosh();
+  }
+
+  dropPlayerBomb() {
+    const p = this.player;
+    p.bombs--;
+    this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));
+    this.audio.click();
+  }
+  updateCarpet(dt) {
+    const p = this.player;
+    if (this.wantCarpet) { this.wantCarpet = false; this.startCarpet(); }
+    if (!p.carpetN) return;
+    p.carpetT -= dt;
+    if (p.carpetT > 0) return;
+    this.releaseCarpetBomb();
+  }
+  startCarpet() {
+    const p = this.player;
+    if (p.carpetN || p.bombs <= 0) return;
+    p.carpetN = Math.min(p.bombs, CARPET.size);
+    p.carpetT = 0;
+    this.audio.whoosh();
+  }
+  releaseCarpetBomb() {
+    const p = this.player;
+    this.dropPlayerBomb();
+    p.carpetN = p.bombs > 0 ? p.carpetN - 1 : 0;
+    p.carpetT = CARPET.interval;
+    p.bombT = 0.32;
   }
 
   /* ------------------------------- main loop ------------------------------ */
@@ -418,6 +447,7 @@ class Game {
 
     if (p.state === 'deck') {
       p.rearmT += dt;
+      p.carpetN = 0; this.wantCarpet = false;
       const f = clamp(p.rearmT / 2.6, 0, 1);
       p.fuel = lerp(p.fuel, FUEL_MAX, dt * 2.5);
       p.hp = lerp(p.hp, 100, dt * 2.5);
@@ -519,10 +549,10 @@ class Game {
       p.muzzle = 0.05;
     }
     p.muzzle = Math.max(0, (p.muzzle || 0) - dt);
-    if (k.KeyB && p.bombT <= 0 && p.bombs > 0) {
-      p.bombT = 0.32; p.bombs--;
-      this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));
-      this.audio.click();
+    this.updateCarpet(dt);
+    if (k.KeyB && !p.carpetN && p.bombT <= 0 && p.bombs > 0) {
+      p.bombT = 0.32;
+      this.dropPlayerBomb();
     }
     if (k.KeyR && p.rktT <= 0 && p.rockets > 0) {
       p.rktT = 0.26; p.rockets--;
