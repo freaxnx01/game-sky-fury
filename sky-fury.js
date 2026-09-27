@@ -131,6 +131,7 @@ const ISLE = [
 const GRAV = 340, THRUST = 275, STALL = 112, MAXS = 560, TURN = 2.35, FLIP_DUR = 0.5;
 const FUEL_MAX = 420;
 const AMMO = { bombs: 5, rockets: 6, torps: 2 };
+const CARPET = { size: AMMO.bombs, interval: 0.1 };
 const SCORE = { jeep: 50, aa: 100, parked: 100, tank: 150, fuel: 200, bunker: 250, radar: 300, ship: 500, fighter: 200, bomber: 300 };
 const PLANE_SCALE = 2;   // aircraft in flight: player, fighters, bombers
 const OBJ_SCALE = 1.5;   // ground targets (incl. parked planes) and projectile sprites
@@ -186,7 +187,7 @@ class Game {
     // bindings
     this._onKey = this.onKey.bind(this);
     this._onKeyUp = e => { this.keys[e.code] = false; };
-    this._onBlur = () => { this.keys = {}; this.wantTorp = false; if (this.state === 'playing') this.paused = true; };
+    this._onBlur = () => { this.keys = {}; this.wantTorp = false; this.wantCarpet = false; if (this.state === 'playing') this.paused = true; };
     this._onResize = this.resize.bind(this);
     this._frame = this.frame.bind(this);
   }
@@ -268,13 +269,13 @@ class Game {
       x: 11980, y: DECK_Y - 12, a: Math.PI, s: 0, vx: 0, vy: 0, vr: -1,
       hp: 100, fuel: FUEL_MAX,
       bombs: AMMO.bombs, rockets: AMMO.rockets, torps: AMMO.torps,
-      heat: 0, jammed: false, gunT: 0, bombT: 0, rktT: 0,
+      heat: 0, jammed: false, gunT: 0, bombT: 0, rktT: 0, carpetN: 0, carpetT: 0,
       flipT: 0, flipDir: 0, deadT: 0, rearmT: 3, smokeT: 0, propT: 0
     };
   }
   beginGame() {
     this.resetWorld();
-    this.keys = {}; this.wantTorp = false;
+    this.keys = {}; this.wantTorp = false; this.wantCarpet = false;
     this.state = 'playing';
     this.paused = false;
     this.spawnWave(1);
@@ -350,6 +351,7 @@ class Game {
     }
     if (c === 'KeyF' && this.state === 'playing' && !this.paused) this.tryFlip();
     if ((c === 'KeyX' || c === 'KeyT') && !e.repeat && this.state === 'playing' && !this.paused) this.wantTorp = true;
+    if (c === 'KeyB' && e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused) this.wantCarpet = true;
   }
   tryFlip() {
     const p = this.player;
