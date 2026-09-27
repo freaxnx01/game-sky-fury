@@ -248,6 +248,7 @@ class Game {
     this.fighters = []; this.bombers = [];
     this.pbullets = []; this.ebullets = [];
     this.bombs = []; this.rockets = []; this.torps = []; this.flaks = [];
+    this.bombAim = null;
     this.delayed = [];
     this.fx = { expl: [], debris: [], smoke: [], splash: [], spark: [], vapor: [] };
     this.ground = []; this.ships = [];
@@ -385,6 +386,7 @@ class Game {
     }
 
     this.updatePlayer(dt);
+    this.bombAim = this.canAimBomb() ? this.predictBombImpact() : null;
     this.updateFighters(dt);
     this.updateBombers(dt);
     this.updateGround(dt);
@@ -814,6 +816,29 @@ class Game {
         this.pbullets.push({ x: 11522, y: DECK_Y - 40, vx: Math.cos(a) * 760, vy: Math.sin(a) * 760, life: 1.1, dmg: 0.5, cv: true });
       }
     }
+  }
+
+  /* ------------------------------ bomb aiming ------------------------------ */
+  canAimBomb() {
+    const p = this.player;
+    return p.state === 'fly' && p.bombs > 0;
+  }
+  predictBombImpact() {
+    const AIM_DT = 1 / 60, AIM_MAX_STEPS = 480, PATH_EVERY = 3;
+    const b = bombLaunch(this.player);
+    const path = [{ x: b.x, y: b.y }];
+    for (let i = 1; i <= AIM_MAX_STEPS; i++) {
+      stepBomb(b, AIM_DT);
+      if (i % PATH_EVERY === 0) path.push({ x: b.x, y: b.y });
+      if (this.bombHitsShip(b)) break;
+      const gy = this.overIsland(b.x) ? this.groundAt(b.x) : 0;
+      if (b.y >= gy) { b.y = gy; break; }
+    }
+    path.push({ x: b.x, y: b.y });
+    return { path, x: b.x, y: b.y };
+  }
+  bombHitsShip(b) {
+    return this.ships.some(s => s.alive && Math.abs(b.x - s.x) < s.w / 2 && b.y > -40);
   }
 
   /* ------------------------------ projectiles ------------------------------ */
