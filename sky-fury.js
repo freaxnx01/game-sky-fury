@@ -2147,13 +2147,14 @@ class Game {
     // controls card
     const cw = Math.min(520, W - 40), cx = W / 2 - cw / 2, cy = H * 0.36;
     ctx.fillStyle = 'rgba(8,20,32,0.72)';
-    this.rr(ctx, cx, cy, cw, 240, 14); ctx.fill();
+    this.rr(ctx, cx, cy, cw, 270, 14); ctx.fill();
     const rows = [
       ['← →', 'Thrust & brake along your facing'],
       ['↑ ↓', 'Climb / dive'],
       ['F', 'Flip — half-loop to reverse for a strafing pass'],
       ['SPACE', 'Machine guns (watch the heat)'],
       ['B / R / X', 'Bombs · Rockets · Torpedo (limited)'],
+      ['SHIFT+B', 'Carpet bombing — all bombs in one stream'],
       ['ENTER', 'Take off from the deck'],
       ['', 'Land low, slow & level on the carrier to rearm']
     ];
@@ -2172,11 +2173,11 @@ class Game {
     const pulse = 0.6 + Math.sin(this.t * 4) * 0.4;
     ctx.fillStyle = `rgba(143,227,161,${pulse})`;
     ctx.font = fnt(24, 800);
-    ctx.fillText('PRESS ENTER TO TAKE OFF', W / 2, cy + 240 + 46);
+    ctx.fillText('PRESS ENTER TO TAKE OFF', W / 2, cy + 270 + 46);
     ctx.fillStyle = 'rgba(220,235,245,0.5)';
     ctx.font = fnt(13, 600);
     const bestStr = this.best > 0 ? 'Best score ' + this.best + ' · ' : '';
-    ctx.fillText(bestStr + 'M mute · P pause', W / 2, cy + 240 + 74);
+    ctx.fillText(bestStr + 'M mute · P pause', W / 2, cy + 270 + 74);
   }
 
   drawPause(ctx) {
