@@ -39,6 +39,7 @@ Set attributes on the tag in `index.html`:
 - **Space** — guns (watch the overheat lockout)
 - **B** / **R** / **T** — bombs, rockets, torpedo
 - **Shift+B** — carpet bombing: release all remaining bombs in one stream
+- **G** (menu only) — toggle sandbox: unlimited bombs, no damage, carrier protected; best score not recorded
 - **F** — flip (half-loop) to reverse direction
 - **P** — pause (also pauses on window blur); **M** — mute
 

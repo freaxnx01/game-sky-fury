@@ -341,7 +341,7 @@ class Game {
     this.audio.ensure();
     if (c === 'KeyM') { this.audio.setMuted(!this.audio.muted); return; }
     if (c === 'KeyP' && this.state === 'playing') { this.paused = !this.paused; this.audio.click(); return; }
-    if (c === 'KeyG' && this.state !== 'playing' && !e.repeat) { this.toggleSandbox(); return; }
+    if (c === 'KeyG' && this.state === 'menu' && !e.repeat) { this.toggleSandbox(); return; }
     if (c === 'Enter') {
       if (this.state === 'menu' || this.state === 'over' || this.state === 'win') {
         this.audio.click(); this.beginGame(); return;
@@ -2173,7 +2173,7 @@ class Game {
       ['SHIFT+B', 'Carpet bombing — all bombs in one stream'],
       ['ENTER', 'Take off from the deck'],
       ['', 'Land low, slow & level on the carrier to rearm'],
-      ['G', 'Sandbox: unlimited bombs, invulnerable — ' + (this.sandbox ? 'ON' : 'OFF')]
+      ['G', 'Sandbox: ∞ bombs, no damage, safe carrier — ' + (this.sandbox ? 'ON' : 'OFF')]
     ];
     ctx.textAlign = 'left';
     rows.forEach((r, i) => {
