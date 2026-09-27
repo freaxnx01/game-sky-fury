@@ -7,6 +7,13 @@
 **Architecture:** Reuse the existing player-bomb projectile and impact code unchanged. Add an edge-triggered `wantCarpet` input flag (same pattern as `wantTorp`), two per-plane fields (`carpetN` = bombs still to release, `carpetT` = time until next release), and four small `Game` methods (`dropPlayerBomb`, `updateCarpet`, `startCarpet`, `releaseCarpetBomb`) called from the flying branch of `updatePlayer`. Document the control in the menu card and README.
 
 **Global Constraints:**
+- **Pipeline verification commands** (run BEFORE and AFTER, paste the output into the PR):
+  ```bash
+  node --check sky-fury.js      # syntax: no output, exit 0 before and after
+  grep -c 'CARPET\|startCarpet\|dropPlayerBomb' sky-fury.js   # before: 0 — after: > 0
+  git diff --name-only origin/main   # after: only sky-fury.js (+ README.md if the plan names it)
+  ```
+  The manual playtest remains the human gate. Don't claim it was run; list it in the PR as outstanding.
 - Buildless vanilla JS, single file `sky-fury.js`; `const`/`let` only; no new files, packages or globals.
 - Input handlers only set flags; simulation state changes happen in `updatePlayer`.
 - Do not change bomb physics, damage, cooldown values or other weapons.

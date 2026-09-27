@@ -5,6 +5,13 @@
 **Architecture:** Extract bomb launch state and bomb physics step into pure module-level helpers shared by the real simulation and a new `Game.predictBombImpact()`. `update()` stores the prediction in `this.bombAim`; a new read-only `drawBombAim(ctx)` layer renders it. Spec: `docs/ai-notes/specs/2026-09-27-bomb-aiming-aid-design.md`.
 
 **Global Constraints:**
+- **Pipeline verification commands** (run BEFORE and AFTER, paste the output into the PR):
+  ```bash
+  node --check sky-fury.js      # syntax: no output, exit 0 before and after
+  grep -c 'bombLaunch\|predictBombImpact\|drawBombAim' sky-fury.js   # before: 0 — after: > 0
+  git diff --name-only origin/main   # after: only sky-fury.js (+ README.md if the plan names it)
+  ```
+  The manual playtest remains the human gate. Don't claim it was run; list it in the PR as outstanding.
 - Buildless vanilla JS, single file `sky-fury.js`; no new files, packages, or build steps.
 - `const`/`let` only; render functions must not mutate game state.
 - Existing bomb behaviour must stay identical (pure refactor in Task 1).

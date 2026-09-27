@@ -13,6 +13,13 @@ existing choke points: bomb drop, `damagePlayer()`, `crashPlane()`, hostile-bomb
 Render code (`drawMenu`, `drawHUD`, `drawEnd`) only reads it.
 
 **Global Constraints:**
+- **Pipeline verification commands** (run BEFORE and AFTER, paste the output into the PR):
+  ```bash
+  node --check sky-fury.js      # syntax: no output, exit 0 before and after
+  grep -ci 'sandbox' sky-fury.js   # before: 0 — after: > 0
+  git diff --name-only origin/main   # after: only sky-fury.js (+ README.md if the plan names it)
+  ```
+  The manual playtest remains the human gate. Don't claim it was run; list it in the PR as outstanding.
 - Only `sky-fury.js` changes. No new files, no dependencies, no build step.
 - `const`/`let` only; input handler writes state, draw functions only read it.
 - `localStorage` access wrapped in `try/catch` (existing pattern, `sky-fury.js:27`, `:59`).
