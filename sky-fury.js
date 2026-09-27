@@ -1182,6 +1182,7 @@ class Game {
     }
   }
   saveBest() {
+    if (this.sandbox) return;
     if (this.score > this.best) {
       this.best = this.score;
       try { localStorage.setItem('sky-fury-best', String(this.best)); } catch (e) {}
@@ -1965,6 +1966,11 @@ class Game {
     ctx.fillStyle = '#cfe4f2';
     ctx.font = fnt(12, 700);
     ctx.fillText('SCORE', pad + 12, pad + 20);
+    if (this.sandbox) {
+      ctx.fillStyle = '#e8b84a';
+      ctx.font = fnt(11, 800);
+      ctx.fillText('SANDBOX', pad + 90, pad + 20);
+    }
     ctx.fillStyle = '#fff';
     ctx.font = fnt(24, 800);
     ctx.fillText(String(this.score), pad + 12, pad + 44);
@@ -2025,7 +2031,7 @@ class Game {
     // ammo
     ctx.font = fnt(15, 800);
     ctx.fillStyle = p.bombs ? '#fff' : 'rgba(255,255,255,0.3)';
-    ctx.fillText('B ' + p.bombs, pad + 12, by + 66);
+    ctx.fillText('B ' + (this.sandbox ? '∞' : p.bombs), pad + 12, by + 66);
     ctx.fillStyle = p.rockets ? '#fff' : 'rgba(255,255,255,0.3)';
     ctx.fillText('R ' + p.rockets, pad + 76, by + 66);
     ctx.fillStyle = p.torps ? '#fff' : 'rgba(255,255,255,0.3)';
@@ -2219,7 +2225,11 @@ class Game {
     ctx.fillStyle = '#fff';
     ctx.font = fnt(28, 800);
     ctx.fillText('SCORE  ' + this.score, W / 2, H * 0.4 + 84);
-    if (this.score >= this.best && this.score > 0) {
+    if (this.sandbox) {
+      ctx.fillStyle = '#e8b84a';
+      ctx.font = fnt(15, 800);
+      ctx.fillText('SANDBOX — SCORE NOT RECORDED', W / 2, H * 0.4 + 110);
+    } else if (this.score >= this.best && this.score > 0) {
       ctx.fillStyle = '#e8b84a';
       ctx.font = fnt(15, 800);
       ctx.fillText('NEW BEST', W / 2, H * 0.4 + 110);
