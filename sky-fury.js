@@ -159,6 +159,8 @@ class Game {
     this.t = 0; this.last = 0;
     this.best = 0;
     try { this.best = +localStorage.getItem('sky-fury-best') || 0; } catch (e) {}
+    this.sandbox = false;
+    try { this.sandbox = localStorage.getItem('sky-fury-sandbox') === '1'; } catch (e) {}
     // terrain lookup
     this.gh = new Float32Array((WORLD_W >> 3) + 4);
     for (let i = 1; i < ISLE.length; i++) {
@@ -339,6 +341,7 @@ class Game {
     this.audio.ensure();
     if (c === 'KeyM') { this.audio.setMuted(!this.audio.muted); return; }
     if (c === 'KeyP' && this.state === 'playing') { this.paused = !this.paused; this.audio.click(); return; }
+    if (c === 'KeyG' && this.state !== 'playing' && !e.repeat) { this.toggleSandbox(); return; }
     if (c === 'Enter') {
       if (this.state === 'menu' || this.state === 'over' || this.state === 'win') {
         this.audio.click(); this.beginGame(); return;
@@ -352,6 +355,11 @@ class Game {
     if (c === 'KeyF' && this.state === 'playing' && !this.paused) this.tryFlip();
     if ((c === 'KeyX' || c === 'KeyT') && !e.repeat && this.state === 'playing' && !this.paused) this.wantTorp = true;
     if (c === 'KeyB' && e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantCarpet = true;
+  }
+  toggleSandbox() {
+    this.sandbox = !this.sandbox;
+    try { localStorage.setItem('sky-fury-sandbox', this.sandbox ? '1' : '0'); } catch (e) {}
+    this.audio.click();
   }
   tryFlip() {
     const p = this.player;
@@ -2146,8 +2154,9 @@ class Game {
 
     // controls card
     const cw = Math.min(520, W - 40), cx = W / 2 - cw / 2, cy = H * 0.36;
+    const cardH = 300;
     ctx.fillStyle = 'rgba(8,20,32,0.72)';
-    this.rr(ctx, cx, cy, cw, 270, 14); ctx.fill();
+    this.rr(ctx, cx, cy, cw, cardH, 14); ctx.fill();
     const rows = [
       ['← →', 'Thrust & brake along your facing'],
       ['↑ ↓', 'Climb / dive'],
@@ -2156,7 +2165,8 @@ class Game {
       ['B / R / X', 'Bombs · Rockets · Torpedo (limited)'],
       ['SHIFT+B', 'Carpet bombing — all bombs in one stream'],
       ['ENTER', 'Take off from the deck'],
-      ['', 'Land low, slow & level on the carrier to rearm']
+      ['', 'Land low, slow & level on the carrier to rearm'],
+      ['G', 'Sandbox: unlimited bombs, invulnerable — ' + (this.sandbox ? 'ON' : 'OFF')]
     ];
     ctx.textAlign = 'left';
     rows.forEach((r, i) => {
@@ -2164,7 +2174,7 @@ class Game {
       ctx.fillStyle = '#7fd0e8';
       ctx.font = fnt(15, 800);
       ctx.fillText(r[0], cx + 26, y);
-      ctx.fillStyle = '#dcebf5';
+      ctx.fillStyle = r[0] === 'G' && this.sandbox ? '#e8b84a' : '#dcebf5';
       ctx.font = fnt(15, 600);
       ctx.fillText(r[1], cx + 118, y);
     });
@@ -2173,11 +2183,11 @@ class Game {
     const pulse = 0.6 + Math.sin(this.t * 4) * 0.4;
     ctx.fillStyle = `rgba(143,227,161,${pulse})`;
     ctx.font = fnt(24, 800);
-    ctx.fillText('PRESS ENTER TO TAKE OFF', W / 2, cy + 270 + 46);
+    ctx.fillText('PRESS ENTER TO TAKE OFF', W / 2, cy + cardH + 46);
     ctx.fillStyle = 'rgba(220,235,245,0.5)';
     ctx.font = fnt(13, 600);
     const bestStr = this.best > 0 ? 'Best score ' + this.best + ' · ' : '';
-    ctx.fillText(bestStr + 'M mute · P pause', W / 2, cy + 270 + 74);
+    ctx.fillText(bestStr + 'M mute · P pause', W / 2, cy + cardH + 74);
   }
 
   drawPause(ctx) {
