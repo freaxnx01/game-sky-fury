@@ -135,6 +135,16 @@ const SCORE = { jeep: 50, aa: 100, parked: 100, tank: 150, fuel: 200, bunker: 25
 const PLANE_SCALE = 2;   // aircraft in flight: player, fighters, bombers
 const OBJ_SCALE = 1.5;   // ground targets (incl. parked planes) and projectile sprites
 
+/* ------------------------------ bomb physics ------------------------------ */
+function bombLaunch(p) {
+  return { x: p.x, y: p.y + 10 * PLANE_SCALE, vx: p.vx, vy: p.vy + 30 };
+}
+function stepBomb(b, dt) {
+  b.vy += GRAV * dt;
+  b.vx *= (1 - 0.25 * dt);
+  b.x += b.vx * dt; b.y += b.vy * dt;
+}
+
 /* ----------------------------------- game --------------------------------- */
 class Game {
   constructor(host, canvas) {
@@ -507,7 +517,7 @@ class Game {
     p.muzzle = Math.max(0, (p.muzzle || 0) - dt);
     if (k.KeyB && p.bombT <= 0 && p.bombs > 0) {
       p.bombT = 0.32; p.bombs--;
-      this.bombs.push({ x: p.x, y: p.y + 10 * PLANE_SCALE, vx: p.vx, vy: p.vy + 30, hostile: false });
+      this.bombs.push(Object.assign(bombLaunch(p), { hostile: false }));
       this.audio.click();
     }
     if (k.KeyR && p.rktT <= 0 && p.rockets > 0) {
@@ -885,9 +895,7 @@ class Game {
     // bombs
     for (let i = this.bombs.length - 1; i >= 0; i--) {
       const b = this.bombs[i];
-      b.vy += GRAV * dt;
-      b.vx *= (1 - 0.25 * dt);
-      b.x += b.vx * dt; b.y += b.vy * dt;
+      stepBomb(b, dt);
       let boom = false;
       const gy = this.overIsland(b.x) ? this.groundAt(b.x) : 0;
       // carrier hit (enemy bombs only)
