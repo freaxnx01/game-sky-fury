@@ -132,6 +132,8 @@ const GRAV = 340, THRUST = 275, STALL = 112, MAXS = 560, TURN = 2.35, FLIP_DUR =
 const FUEL_MAX = 420;
 const AMMO = { bombs: 5, rockets: 6, torps: 2 };
 const SCORE = { jeep: 50, aa: 100, parked: 100, tank: 150, fuel: 200, bunker: 250, radar: 300, ship: 500, fighter: 200, bomber: 300 };
+const PLANE_SCALE = 2;   // aircraft in flight: player, fighters, bombers
+const OBJ_SCALE = 1.5;   // ground targets (incl. parked planes) and projectile sprites
 
 /* ----------------------------------- game --------------------------------- */
 class Game {
@@ -452,7 +454,7 @@ class Game {
       p.flipT -= dt;
       p.a += (Math.PI / FLIP_DUR) * p.flipDir * dt;
       p.s = Math.max(p.s - 26 * dt, 90);
-      if (chance(0.7)) this.fx.vapor.push({ x: p.x - Math.cos(p.a) * 14, y: p.y - Math.sin(p.a) * 14, r: rand(2, 5), life: 0.5, t: 0 });
+        if (chance(0.7)) this.fx.vapor.push({ x: p.x - Math.cos(p.a) * 14 * PLANE_SCALE, y: p.y - Math.sin(p.a) * 14 * PLANE_SCALE, r: rand(2, 5), life: 0.5, t: 0 });
     } else {
       const eff = clamp(p.s / 220, 0.35, 1);
       if (k.ArrowUp) p.a -= TURN * eff * fwd * dt;
@@ -492,7 +494,7 @@ class Game {
       p.heat += 7.5;
       if (p.heat >= 100) { p.jammed = true; }
       const sp = 900;
-      const mx = p.x + Math.cos(p.a) * 20, my = p.y + Math.sin(p.a) * 20;
+      const mx = p.x + Math.cos(p.a) * 20 * PLANE_SCALE, my = p.y + Math.sin(p.a) * 20 * PLANE_SCALE;
       this.pbullets.push({
         x: mx, y: my,
         vx: p.vx + Math.cos(p.a + rand(-0.02, 0.02)) * sp,
@@ -505,13 +507,13 @@ class Game {
     p.muzzle = Math.max(0, (p.muzzle || 0) - dt);
     if (k.KeyB && p.bombT <= 0 && p.bombs > 0) {
       p.bombT = 0.32; p.bombs--;
-      this.bombs.push({ x: p.x, y: p.y + 10, vx: p.vx, vy: p.vy + 30, hostile: false });
+      this.bombs.push({ x: p.x, y: p.y + 10 * PLANE_SCALE, vx: p.vx, vy: p.vy + 30, hostile: false });
       this.audio.click();
     }
     if (k.KeyR && p.rktT <= 0 && p.rockets > 0) {
       p.rktT = 0.26; p.rockets--;
       this.rockets.push({
-        x: p.x + Math.cos(p.a) * 16, y: p.y + Math.sin(p.a) * 16 + 6,
+        x: p.x + Math.cos(p.a) * 16 * PLANE_SCALE, y: p.y + Math.sin(p.a) * 16 * PLANE_SCALE + 6 * PLANE_SCALE,
         vx: p.vx + Math.cos(p.a) * 380, vy: p.vy + Math.sin(p.a) * 380,
         a: p.a, life: 2.2
       });
@@ -521,7 +523,7 @@ class Game {
       this.wantTorp = false;
       if (p.torps > 0 && !p.torpT) {
         p.torpT = 0.5; p.torps--;
-        this.torps.push({ x: p.x, y: p.y + 12, vx: p.vx, vy: p.vy + 20, water: false, life: 10 });
+        this.torps.push({ x: p.x, y: p.y + 12 * PLANE_SCALE, vx: p.vx, vy: p.vy + 20, water: false, life: 10 });
         this.audio.click();
       }
     }
@@ -532,7 +534,7 @@ class Game {
       p.smokeT -= dt;
       if (p.smokeT <= 0) {
         p.smokeT = 0.06;
-        this.addSmoke(p.x - Math.cos(p.a) * 16, p.y - Math.sin(p.a) * 16, rand(3, 6));
+        this.addSmoke(p.x - Math.cos(p.a) * 16 * PLANE_SCALE, p.y - Math.sin(p.a) * 16 * PLANE_SCALE, rand(3, 6));
       }
     }
 
@@ -689,7 +691,7 @@ class Game {
       b.dropT -= dt;
       if (b.dropped < 3 && Math.abs(b.x - CV.cx) < 300 && b.dropT <= 0) {
         b.dropped++; b.dropT = 0.38;
-        this.bombs.push({ x: b.x, y: b.y + 14, vx: b.vx + rand(-14, 14), vy: 40, hostile: true });
+        this.bombs.push({ x: b.x, y: b.y + 14 * PLANE_SCALE, vx: b.vx + rand(-14, 14), vy: 40, hostile: true });
       }
       if (b.hp < 5) {
         b.smokeT -= dt;
@@ -715,7 +717,7 @@ class Game {
         t.y = this.groundAt(t.x);
       }
       if (t.type === 'aa' && p.state === 'fly') {
-        const gx = t.x, gy = t.y - 12;
+        const gx = t.x, gy = t.y - 12 * OBJ_SCALE;
         const dx = p.x - gx, dy = p.y - gy;
         const d = Math.hypot(dx, dy);
         t.aim = Math.atan2(dy, dx);
@@ -824,7 +826,7 @@ class Game {
         // ground targets
         for (const t of this.ground) {
           if (!t.alive) continue;
-          const hw = t.type === 'bunker' ? 30 : 22, hh = t.type === 'radar' ? 52 : 24;
+          const hw = (t.type === 'bunker' ? 30 : 22) * OBJ_SCALE, hh = (t.type === 'radar' ? 52 : 24) * OBJ_SCALE;
           if (Math.abs(b.x - t.x) < hw && b.y > t.y - hh && b.y < t.y + 6) {
             if (t.armored) { this.addSpark(b.x, b.y, 3); }
             else { t.hp -= b.dmg; this.addSpark(b.x, b.y, 3); if (t.hp <= 0) this.destroyTarget(t); }
@@ -834,7 +836,7 @@ class Game {
       }
       if (!dead) for (let j = this.fighters.length - 1; j >= 0; j--) {
         const f = this.fighters[j];
-        if (Math.hypot(b.x - f.x, b.y - f.y) < 20) {
+        if (Math.hypot(b.x - f.x, b.y - f.y) < 20 * PLANE_SCALE) {
           f.hp -= b.dmg; this.addSpark(b.x, b.y, 2); dead = true;
           if (f.hp <= 0) this.killFighter(j, false);
           break;
@@ -842,7 +844,7 @@ class Game {
       }
       if (!dead) for (let j = this.bombers.length - 1; j >= 0; j--) {
         const bo = this.bombers[j];
-        if (Math.abs(b.x - bo.x) < 34 && Math.abs(b.y - bo.y) < 14) {
+        if (Math.abs(b.x - bo.x) < 34 * PLANE_SCALE && Math.abs(b.y - bo.y) < 14 * PLANE_SCALE) {
           bo.hp -= b.dmg; this.addSpark(b.x, b.y, 2); dead = true;
           if (bo.hp <= 0) {
             this.addExplosion(bo.x, bo.y, 1.4);
@@ -938,14 +940,14 @@ class Game {
       if (r.y >= gy) hit = true;
       if (!hit) {
         for (const t of this.ground) {
-          if (t.alive && Math.abs(r.x - t.x) < 26 && r.y > t.y - 30 && r.y < t.y + 6) { hit = true; break; }
+          if (t.alive && Math.abs(r.x - t.x) < 26 * OBJ_SCALE && r.y > t.y - 30 * OBJ_SCALE && r.y < t.y + 6) { hit = true; break; }
         }
         if (!hit) for (const s of this.ships) {
           if (s.alive && Math.abs(r.x - s.x) < s.w / 2 && r.y > -44) { this.damageShip(s, 4); hit = true; break; }
         }
         if (!hit) for (let j = this.bombers.length - 1; j >= 0; j--) {
           const bo = this.bombers[j];
-          if (Math.abs(r.x - bo.x) < 36 && Math.abs(r.y - bo.y) < 16) {
+          if (Math.abs(r.x - bo.x) < 36 * PLANE_SCALE && Math.abs(r.y - bo.y) < 16 * PLANE_SCALE) {
             bo.hp -= 8; hit = true;
             if (bo.hp <= 0) {
               this.addExplosion(bo.x, bo.y, 1.4); this.audio.boom(1.5);
@@ -1058,8 +1060,8 @@ class Game {
     for (const t of this.ground) {
       if (!t.alive) continue;
       const d = Math.hypot(t.x - x, t.y - 10 - y);
-      if (d < r + 18) {
-        const f = clamp(1.5 * (1 - d / (r + 18)), 0, 1);
+      if (d < r + 18 * OBJ_SCALE) {
+        const f = clamp(1.5 * (1 - d / (r + 18 * OBJ_SCALE)), 0, 1);
         t.hp -= dmg * f;
         if (t.hp <= 0) this.destroyTarget(t);
       }
@@ -1447,7 +1449,7 @@ class Game {
 
   /* -------- ground targets -------- */
   drawTargets(ctx) {
-    const sc = this.scale;
+    const sc = this.scale * OBJ_SCALE;
     for (const t of this.ground) {
       const x = this.sx(t.x), y = this.sy(t.y);
       if (x < -80 || x > this.W + 80) continue;
@@ -1617,7 +1619,7 @@ class Game {
       ctx.rotate(p.a);
       const vr = clamp(p.vr, -1, 1);
       ctx.scale(1, Math.abs(vr) < 0.18 ? (vr < 0 ? -0.18 : 0.18) : vr);
-      const s = 1.15 * sc;
+      const s = 1.15 * sc * PLANE_SCALE;
       this.paintPlane(ctx, s, p.hitFlash > 0 ? '#8fb6dd' : '#3e6285', '#31506e', false);
       // roundel
       ctx.fillStyle = '#e8edf2';
@@ -1648,7 +1650,7 @@ class Game {
       ctx.rotate(f.a);
       const vr = clamp(f.vr, -1, 1);
       ctx.scale(1, Math.abs(vr) < 0.18 ? (vr < 0 ? -0.18 : 0.18) : vr);
-      const s = 1.05 * sc;
+      const s = 1.05 * sc * PLANE_SCALE;
       this.paintPlane(ctx, s, '#77754f', '#5f5e3f', false);
       ctx.fillStyle = '#c8452e';
       ctx.beginPath(); ctx.arc(-6 * s, -0.5 * s, 2.4 * s, 0, TAU); ctx.fill();
@@ -1663,7 +1665,7 @@ class Game {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(-1, 1); // flying left
-      const s = 1.1 * sc;
+      const s = 1.1 * sc * PLANE_SCALE;
       ctx.fillStyle = '#5e6247';
       // fuselage
       ctx.beginPath();
@@ -1698,6 +1700,7 @@ class Game {
   /* -------- projectiles & fx -------- */
   drawProjectiles(ctx) {
     const sc = this.scale;
+    const os = sc * OBJ_SCALE;
     ctx.lineCap = 'round';
     // player tracers
     ctx.strokeStyle = '#eaf6ff';
@@ -1728,9 +1731,9 @@ class Game {
       ctx.translate(x, y);
       ctx.rotate(Math.atan2(b.vy, b.vx));
       ctx.beginPath();
-      ctx.ellipse(0, 0, 7 * sc, 3 * sc, 0, 0, TAU);
+      ctx.ellipse(0, 0, 7 * os, 3 * os, 0, 0, TAU);
       ctx.fill();
-      ctx.fillRect(-9 * sc, -2.4 * sc, 3 * sc, 4.8 * sc);
+      ctx.fillRect(-9 * os, -2.4 * os, 3 * os, 4.8 * os);
       ctx.restore();
     }
     // rockets
@@ -1740,11 +1743,11 @@ class Game {
       ctx.translate(x, y);
       ctx.rotate(r.a);
       ctx.fillStyle = '#d8dde2';
-      ctx.fillRect(-6 * sc, -1.6 * sc, 12 * sc, 3.2 * sc);
+      ctx.fillRect(-6 * os, -1.6 * os, 12 * os, 3.2 * os);
       ctx.fillStyle = '#ffb54a';
       ctx.beginPath();
-      ctx.moveTo(-6 * sc, 0); ctx.lineTo(-12 * sc, 0);
-      ctx.lineWidth = 2.6 * sc; ctx.strokeStyle = 'rgba(255,180,74,0.9)'; ctx.stroke();
+      ctx.moveTo(-6 * os, 0); ctx.lineTo(-12 * os, 0);
+      ctx.lineWidth = 2.6 * os; ctx.strokeStyle = 'rgba(255,180,74,0.9)'; ctx.stroke();
       ctx.restore();
     }
     // torpedoes
@@ -1755,12 +1758,12 @@ class Game {
       ctx.rotate(t.water ? 0 : Math.atan2(t.vy, t.vx));
       ctx.fillStyle = '#3a4750';
       ctx.beginPath();
-      ctx.ellipse(0, 0, 11 * sc, 2.8 * sc, 0, 0, TAU);
+      ctx.ellipse(0, 0, 11 * os, 2.8 * os, 0, 0, TAU);
       ctx.fill();
       ctx.restore();
       if (t.water) {
         ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.fillRect(x - (t.vx > 0 ? 30 : -6) * sc, this.sy(-1), 24 * sc, 1.6 * sc);
+        ctx.fillRect(x - (t.vx > 0 ? 30 : -6) * os, this.sy(-1), 24 * os, 1.6 * os);
       }
     }
     // flak shells in flight
