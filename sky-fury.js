@@ -135,6 +135,8 @@ const CARPET = { size: AMMO.bombs, interval: 0.1 };
 const SCORE = { jeep: 50, aa: 100, parked: 100, tank: 150, fuel: 200, bunker: 250, radar: 300, ship: 500, fighter: 200, bomber: 300 };
 const PLANE_SCALE = 2;   // aircraft in flight: player, fighters, bombers
 const OBJ_SCALE = 1.5;   // ground targets (incl. parked planes) and projectile sprites
+const SIM_DT = 1 / 60;      // fixed simulation step (s); also used by the bomb aiming aid
+const MAX_FRAME_DT = 0.1;   // max wall-clock time fed into one frame (caps at 6 steps)
 
 /* ------------------------------ bomb physics ------------------------------ */
 function bombLaunch(p) {
@@ -156,7 +158,7 @@ class Game {
     this.state = 'menu';       // menu | playing | over | win
     this.paused = false;
     this.overReason = '';
-    this.t = 0; this.last = 0;
+    this.t = 0; this.last = 0; this.accumulator = 0;
     this.best = 0;
     try { this.best = +localStorage.getItem('sky-fury-best') || 0; } catch (e) {}
     this.sandbox = false;
@@ -403,11 +405,13 @@ class Game {
   frame(now) {
     this._raf = requestAnimationFrame(this._frame);
     if (!this.last) this.last = now;
-    let dt = (now - this.last) / 1000;
+    this.accumulator += clamp((now - this.last) / 1000, 0, MAX_FRAME_DT);
     this.last = now;
-    dt = clamp(dt, 0, 1 / 30);
-    this.t += dt;
-    this.update(dt);
+    while (this.accumulator >= SIM_DT) {
+      this.t += SIM_DT;
+      this.update(SIM_DT);
+      this.accumulator -= SIM_DT;
+    }
     this.draw();
   }
 
