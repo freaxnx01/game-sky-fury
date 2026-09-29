@@ -903,7 +903,7 @@ class Game {
         for (const t of this.ground) {
           if (!t.alive) continue;
           const hw = (t.type === 'bunker' ? 30 : 22) * OBJ_SCALE, hh = (t.type === 'radar' ? 52 : 24) * OBJ_SCALE;
-          if (Math.abs(b.x - t.x) < hw && b.y > t.y - hh && b.y < t.y + 6) {
+          if (Math.abs(b.x - t.x) < hw && b.y > t.y - hh && b.y < t.y + 6 * OBJ_SCALE) {
             if (t.armored) { this.addSpark(b.x, b.y, 3); }
             else { t.hp -= b.dmg; this.addSpark(b.x, b.y, 3); if (t.hp <= 0) this.destroyTarget(t); }
             dead = true; break;
@@ -1014,7 +1014,7 @@ class Game {
       if (r.y >= gy) hit = true;
       if (!hit) {
         for (const t of this.ground) {
-          if (t.alive && Math.abs(r.x - t.x) < 26 * OBJ_SCALE && r.y > t.y - 30 * OBJ_SCALE && r.y < t.y + 6) { hit = true; break; }
+          if (t.alive && Math.abs(r.x - t.x) < 26 * OBJ_SCALE && r.y > t.y - 30 * OBJ_SCALE && r.y < t.y + 6 * OBJ_SCALE) { hit = true; break; }
         }
         if (!hit) for (const s of this.ships) {
           if (s.alive && Math.abs(r.x - s.x) < s.w / 2 && r.y > -44) { this.damageShip(s, 4); hit = true; break; }
@@ -1120,8 +1120,8 @@ class Game {
     if (!t.alive) return;
     t.alive = false;
     const size = t.type === 'fuel' ? 1.8 : t.type === 'bunker' || t.type === 'radar' ? 1.4 : 1;
-    this.addExplosion(t.x, t.y - 8, size);
-    this.addDebris(t.x, t.y - 8, 8, '#57534e');
+    this.addExplosion(t.x, t.y - 8 * OBJ_SCALE, size);
+    this.addDebris(t.x, t.y - 8 * OBJ_SCALE, 8, '#57534e');
     this.audio.boom(size); this.shake(6);
     this.score += SCORE[t.type] || 100;
     if (t.type === 'fuel') {
@@ -1133,7 +1133,7 @@ class Game {
   blast(x, y, r, dmg, fromPlayer, hitsCarrier) {
     for (const t of this.ground) {
       if (!t.alive) continue;
-      const d = Math.hypot(t.x - x, t.y - 10 - y);
+      const d = Math.hypot(t.x - x, t.y - 10 * OBJ_SCALE - y);
       if (d < r + 18 * OBJ_SCALE) {
         const f = clamp(1.5 * (1 - d / (r + 18 * OBJ_SCALE)), 0, 1);
         t.hp -= dmg * f;
