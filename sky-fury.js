@@ -869,11 +869,11 @@ class Game {
     return p.state === 'fly' && p.bombs > 0;
   }
   predictBombImpact() {
-    const AIM_DT = 1 / 60, AIM_MAX_STEPS = 480, PATH_EVERY = 3;
+    const AIM_MAX_STEPS = 480, PATH_EVERY = 3;
     const b = bombLaunch(this.player);
     const path = [{ x: b.x, y: b.y }];
     for (let i = 1; i <= AIM_MAX_STEPS; i++) {
-      stepBomb(b, AIM_DT);
+      stepBomb(b, SIM_DT);
       if (i % PATH_EVERY === 0) path.push({ x: b.x, y: b.y });
       if (this.bombHitsShip(b)) break;
       const gy = this.overIsland(b.x) ? this.groundAt(b.x) : 0;
