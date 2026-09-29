@@ -506,7 +506,7 @@ class Game {
       p.flipT -= dt;
       p.a += (Math.PI / FLIP_DUR) * p.flipDir * dt;
       p.s = Math.max(p.s - 26 * dt, 90);
-        if (chance(0.7)) this.fx.vapor.push({ x: p.x - Math.cos(p.a) * 14 * PLANE_SCALE, y: p.y - Math.sin(p.a) * 14 * PLANE_SCALE, r: rand(2, 5), life: 0.5, t: 0 });
+      if (chance(0.7)) this.fx.vapor.push({ x: p.x - Math.cos(p.a) * 14 * PLANE_SCALE, y: p.y - Math.sin(p.a) * 14 * PLANE_SCALE, r: rand(2, 5), life: 0.5, t: 0 });
     } else {
       const eff = clamp(p.s / 220, 0.35, 1);
       if (k.ArrowUp) p.a -= TURN * eff * fwd * dt;
@@ -1147,7 +1147,7 @@ class Game {
     }
     for (let j = this.fighters.length - 1; j >= 0; j--) {
       const f = this.fighters[j];
-      if (Math.hypot(f.x - x, f.y - y) < r) { this.killFighter(j, false); }
+      if (Math.hypot(f.x - x, f.y - y) < r + 10 * PLANE_SCALE) { this.killFighter(j, false); }
     }
     const p = this.player;
     if (p.state === 'fly') {
