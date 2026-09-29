@@ -191,7 +191,7 @@ class Game {
     // bindings
     this._onKey = this.onKey.bind(this);
     this._onKeyUp = e => { this.keys[e.code] = false; };
-    this._onBlur = () => { this.keys = {}; this.wantTorp = false; this.wantCarpet = false; if (this.state === 'playing') this.paused = true; };
+    this._onBlur = () => { this.keys = {}; this.wantTorp = false; this.wantCarpet = false; this.last = 0; this.accumulator = 0; if (this.state === 'playing') this.paused = true; };
     this._onResize = this.resize.bind(this);
     this._frame = this.frame.bind(this);
   }
