@@ -26,6 +26,7 @@ trim = true
 conventional_commits = true
 filter_unconventional = true
 commit_parsers = [
+  { message = "^[a-z]+\\(ai-notes\\)", skip = true },
   { message = "^feat", group = "Added" },
   { message = "^fix", group = "Fixed" },
   { message = "^perf", group = "Changed" },

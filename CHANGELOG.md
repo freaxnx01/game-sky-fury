@@ -27,7 +27,42 @@ All notable changes to this project are documented here, following
 ## [0.2.0] - 2026-09-29
 
 ### Added
-- Fullscreen toggle (⛶) in the game navigation
+
+- Add favicon
+
+- Scale aircraft x2 and ground/projectile sprites x1.5 (#2)
+
+- Predict bomb impact point each tick
+
+- Draw predicted impact arc and crosshair
+
+- Add carpet-bombing input flag and plane state
+
+- Add Shift+B carpet bombing salvo
+
+- Add sandbox mode toggle on menu (G), persisted
+
+- Sandbox gives unlimited bombs and invulnerability
+
+- Show sandbox HUD tag and skip best score in sandbox
+
+- Add fullscreen toggle
+
+### Changed
+
+- Extract shared bomb launch and physics step
+
+### Documentation
+
+- Document Shift+B carpet bombing
+
+### Fixed
+
+- Add missing per-release version header to changelog template
+
+- Grant actions: write to agent-workflow caller
+
+- Sandbox toggle on menu only, clarify its menu text
 
 ## [0.1.0] - 2026-07-18
 
