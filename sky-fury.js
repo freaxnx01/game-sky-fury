@@ -504,10 +504,11 @@ class Game {
 
     /* ------ flying ------ */
     const fwd = Math.cos(p.a) >= 0 ? 1 : -1;
+    const shift = k.ShiftLeft || k.ShiftRight;
     if (flipReq === -fwd) this.tryFlip();
     let th = 0, br = 0;
     if ((k.ArrowRight && fwd > 0) || (k.ArrowLeft && fwd < 0)) th = 1;
-    if ((k.ArrowRight && fwd < 0) || (k.ArrowLeft && fwd > 0)) br = 1;
+    if (shift && ((k.ArrowRight && fwd < 0) || (k.ArrowLeft && fwd > 0))) br = 1;
     if (p.fuel <= 0) th = 0;
 
     if (p.flipT > 0) {
