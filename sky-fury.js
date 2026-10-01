@@ -129,6 +129,7 @@ const ISLE = [
   [8320, -72], [8840, -88], [9180, -34], [9400, 0]
 ];
 const GRAV = 340, THRUST = 275, STALL = 112, MAXS = 560, TURN = 2.35, FLIP_DUR = 0.5;
+const FLIP_MIN_S = 100; // min flip speed: below STALL so a slow plane can still flip, above the flip's 90 speed floor so unpowered flips can't chain
 const FUEL_MAX = 420;
 const AMMO = { bombs: 5, rockets: 6, torps: 2 };
 const CARPET = { size: AMMO.bombs, interval: 0.1 };
@@ -191,7 +192,7 @@ class Game {
     // bindings
     this._onKey = this.onKey.bind(this);
     this._onKeyUp = e => { this.keys[e.code] = false; };
-    this._onBlur = () => { this.keys = {}; this.wantTorp = false; this.wantCarpet = false; this.last = 0; this.accumulator = 0; if (this.state === 'playing') this.paused = true; };
+    this._onBlur = () => { this.keys = {}; this.wantTorp = false; this.wantCarpet = false; this.wantFlip = 0; this.last = 0; this.accumulator = 0; if (this.state === 'playing') this.paused = true; };
     this._onResize = this.resize.bind(this);
     this._frame = this.frame.bind(this);
   }
@@ -279,7 +280,7 @@ class Game {
   }
   beginGame() {
     this.resetWorld();
-    this.keys = {}; this.wantTorp = false; this.wantCarpet = false;
+    this.keys = {}; this.wantTorp = false; this.wantCarpet = false; this.wantFlip = 0;
     this.state = 'playing';
     this.paused = false;
     this.spawnWave(1);
@@ -357,6 +358,7 @@ class Game {
     if (c === 'KeyF' && this.state === 'playing' && !this.paused) this.tryFlip();
     if ((c === 'KeyX' || c === 'KeyT') && !e.repeat && this.state === 'playing' && !this.paused) this.wantTorp = true;
     if (c === 'KeyB' && e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantCarpet = true;
+    if ((c === 'ArrowLeft' || c === 'ArrowRight') && !e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantFlip = c === 'ArrowRight' ? 1 : -1;
   }
   toggleSandbox() {
     this.sandbox = !this.sandbox;
@@ -365,7 +367,7 @@ class Game {
   }
   tryFlip() {
     const p = this.player;
-    if (p.state !== 'fly' || p.flipT > 0 || p.s < 135) return;
+    if (p.state !== 'fly' || p.flipT > 0 || p.s < FLIP_MIN_S) return;
     const fwd = Math.cos(p.a) >= 0 ? 1 : -1;
     p.flipT = FLIP_DUR;
     p.flipDir = -fwd;
@@ -444,6 +446,7 @@ class Game {
   /* --------------------------------- player ------------------------------- */
   updatePlayer(dt) {
     const p = this.player, k = this.keys;
+    const flipReq = this.wantFlip; this.wantFlip = 0;
     p.propT += dt * (8 + p.s * 0.05);
 
     if (p.state === 'dead') {
@@ -501,6 +504,7 @@ class Game {
 
     /* ------ flying ------ */
     const fwd = Math.cos(p.a) >= 0 ? 1 : -1;
+    if (flipReq === -fwd) this.tryFlip();
     let th = 0, br = 0;
     if ((k.ArrowRight && fwd > 0) || (k.ArrowLeft && fwd < 0)) th = 1;
     if ((k.ArrowRight && fwd < 0) || (k.ArrowLeft && fwd > 0)) br = 1;
