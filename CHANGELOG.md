@@ -6,6 +6,21 @@ All notable changes to this project are documented here, following
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-01
+
+### Added
+
+- Flip by tapping the opposite arrow, from speed 100 (#15)
+
+- Brake with Shift + the arrow behind you (#15)
+
+- Document Shift thrust/brake and arrow flip (#15)
+
+### Fixed
+
+- Move carpet bombing to C, clarify thrust/brake row (#15)
+
+
 ## [0.2.1] - 2026-09-30
 
 ### Changed
