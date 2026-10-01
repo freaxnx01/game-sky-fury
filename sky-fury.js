@@ -2179,9 +2179,9 @@ class Game {
     ctx.fillStyle = 'rgba(8,20,32,0.72)';
     this.rr(ctx, cx, cy, cw, cardH, 14); ctx.fill();
     const rows = [
-      ['← →', 'Thrust & brake along your facing'],
+      ['SHIFT ← →', 'Thrust & brake along your facing'],
       ['↑ ↓', 'Climb / dive'],
-      ['F', 'Flip — half-loop to reverse for a strafing pass'],
+      ['← → / F', 'Flip — tap the arrow behind you (or F)'],
       ['SPACE', 'Machine guns (watch the heat)'],
       ['B / R / X', 'Bombs · Rockets · Torpedo (limited)'],
       ['SHIFT+B', 'Carpet bombing — all bombs in one stream'],
