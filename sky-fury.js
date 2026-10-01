@@ -343,7 +343,7 @@ class Game {
     this.keys[c] = true;
     this.audio.ensure();
     if (c === 'KeyM') { this.audio.setMuted(!this.audio.muted); return; }
-    if (c === 'KeyP' && this.state === 'playing') { this.paused = !this.paused; this.audio.click(); return; }
+    if (c === 'KeyP' && this.state === 'playing') { this.paused = !this.paused; this.wantTorp = false; this.wantCarpet = false; this.wantFlip = 0; this.audio.click(); return; }
     if (c === 'KeyG' && this.state === 'menu' && !e.repeat) { this.toggleSandbox(); return; }
     if (c === 'Enter') {
       if (this.state === 'menu' || this.state === 'over' || this.state === 'win') {
@@ -357,7 +357,7 @@ class Game {
     }
     if (c === 'KeyF' && this.state === 'playing' && !this.paused) this.tryFlip();
     if ((c === 'KeyX' || c === 'KeyT') && !e.repeat && this.state === 'playing' && !this.paused) this.wantTorp = true;
-    if (c === 'KeyB' && e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantCarpet = true;
+    if (c === 'KeyC' && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantCarpet = true;
     if ((c === 'ArrowLeft' || c === 'ArrowRight') && !e.shiftKey && !e.repeat && this.state === 'playing' && !this.paused && this.player.state === 'fly') this.wantFlip = c === 'ArrowRight' ? 1 : -1;
   }
   toggleSandbox() {
@@ -2179,12 +2179,12 @@ class Game {
     ctx.fillStyle = 'rgba(8,20,32,0.72)';
     this.rr(ctx, cx, cy, cw, cardH, 14); ctx.fill();
     const rows = [
-      ['SHIFT ← →', 'Thrust & brake along your facing'],
+      ['← →', 'Thrust ahead · ⇧ + arrow behind = brake'],
       ['↑ ↓', 'Climb / dive'],
       ['← → / F', 'Flip — tap the arrow behind you (or F)'],
       ['SPACE', 'Machine guns (watch the heat)'],
       ['B / R / X', 'Bombs · Rockets · Torpedo (limited)'],
-      ['SHIFT+B', 'Carpet bombing — all bombs in one stream'],
+      ['C', 'Carpet bombing — all bombs in one stream'],
       ['ENTER', 'Take off from the deck'],
       ['', 'Land low, slow & level on the carrier to rearm'],
       ['G', 'Sandbox: ∞ bombs, no damage, safe carrier — ' + (this.sandbox ? 'ON' : 'OFF')]

@@ -35,10 +35,10 @@ Set attributes on the tag in `index.html`:
 ## Controls
 
 - **Enter** — start / restart
-- **↑ ↓** — pitch; **Shift+← / →** — thrust / brake along your facing (plain arrow in your facing also thrusts)
+- **↑ ↓** — pitch; **← / →** in your facing — thrust; **Shift + the arrow behind you** — brake
 - **Space** — guns (watch the overheat lockout)
 - **B** / **R** / **T** — bombs, rockets, torpedo
-- **Shift+B** — carpet bombing: release all remaining bombs in one stream
+- **C** — carpet bombing: release all remaining bombs in one stream
 - **G** (menu only) — toggle sandbox: unlimited bombs, no damage, carrier protected; best score not recorded
 - **Tap the arrow behind you** (or **F**) — flip (half-loop) to reverse direction; needs speed ≥ 100
 - **P** — pause (also pauses on window blur); **M** — mute
